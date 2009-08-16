@@ -709,14 +709,6 @@ sub PackRecord
 		$location = $record->{location} . "\0";
 	}
 
-	my $location = undef;
-
-	if ($iscal && defined($record->{location}) && ($record->{location} ne ""))
-	{
-		$flags |= 0x0200;
-		$location = $record->{location} . "\0";
-	}
-
 	$retval = pack "C C C C n n",
 		$record->{start_hour},
 		$record->{start_minute},
