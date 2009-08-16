@@ -1,0 +1,11 @@
+load.t
+pod.t
+pod_coverage.t
+loadwrite.t
+address.t
+bogusdb.t
+datebook.t
+mail.t
+memo.t
+mkpdbname.t
+todo.t
