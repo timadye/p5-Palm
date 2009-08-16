@@ -5,8 +5,6 @@
 #	Copyright (C) 1999, 2000, Andrew Arensburger.
 #	You may distribute this file under the terms of the Artistic
 #	License, as specified in the README file.
-#
-# $Id: PDB.pm,v 1.36 2005/03/09 04:30:41 christophe Exp $
 
 # A Palm database file (either .pdb or .prc) has the following overall
 # structure:

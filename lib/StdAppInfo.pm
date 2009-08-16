@@ -5,8 +5,6 @@
 #	Copyright (C) 1999, 2000, Andrew Arensburger.
 #	You may distribute this file under the terms of the Artistic
 #	License, as specified in the README file.
-#
-# $Id: StdAppInfo.pm,v 1.20 2004/07/07 02:36:16 christophe Exp $
 
 use strict;
 package Palm::StdAppInfo;

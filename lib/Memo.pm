@@ -5,8 +5,6 @@
 #	Copyright (C) 1999, 2000, Andrew Arensburger.
 #	You may distribute this file under the terms of the Artistic
 #	License, as specified in the README file.
-#
-# $Id: Memo.pm,v 1.13 2002/11/07 14:12:05 arensb Exp $
 
 use strict;
 package Palm::Memo;

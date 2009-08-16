@@ -5,8 +5,6 @@
 #	Copyright (C) 1999, 2000, Andrew Arensburger.
 #	You may distribute this file under the terms of the Artistic
 #	License, as specified in the README file.
-#
-# $Id: Address.pm,v 1.19 2002/11/07 14:11:42 arensb Exp $
 
 use strict;
 package Palm::Address;

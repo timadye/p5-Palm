@@ -11,8 +11,6 @@
 #	Copyright (C) 1999, 2000, Andrew Arensburger.
 #	You may distribute this file under the terms of the Artistic
 #	License, as specified in the README file.
-#
-# $Id: Raw.pm,v 1.11 2005/03/29 02:46:03 arensb Exp $
 
 use strict;
 package Palm::Raw;

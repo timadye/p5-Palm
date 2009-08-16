@@ -12,7 +12,6 @@
 #  dlptime	- PalmOS DlpDateTimeType (raw)
 #  datetime	- PalmOS DateTimeType (raw)	
 #  palmtime	- Decoded date/time
-#
 
 package Palm::DateTime;
 

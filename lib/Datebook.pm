@@ -1,12 +1,10 @@
 # Palm::Datebook.pm
 # 
-# Perl class for dealing with Palm DateBook databases. 
+# Perl class for dealing with Palm DateBook and Calendar databases. 
 #
 #	Copyright (C) 1999-2001, Andrew Arensburger.
 #	You may distribute this file under the terms of the Artistic
 #	License, as specified in the README file.
-#
-# $Id: Datebook.pm,v 1.20 2003/10/10 23:19:58 azummo Exp $
 
 use strict;
 package Palm::Datebook;
@@ -16,14 +14,14 @@ use Palm::StdAppInfo();
 use vars qw( $VERSION @ISA );
 
 # One liner, to allow MakeMaker to work.
-$VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = '1.22';
 
 @ISA = qw( Palm::StdAppInfo Palm::Raw );
 
 
 =head1 NAME
 
-Palm::Datebook - Handler for Palm DateBook databases.
+Palm::Datebook - Handler for Palm DateBook and Calendar databases.
 
 =head1 SYNOPSIS
 
@@ -32,7 +30,7 @@ Palm::Datebook - Handler for Palm DateBook databases.
 =head1 DESCRIPTION
 
 The Datebook PDB handler is a helper class for the Palm::PDB package.
-It parses DateBook databases.
+It parses DateBook and Calendar databases.
 
 =head2 AppInfo block
 
@@ -189,6 +187,10 @@ three elements: the day, month, and year of the exception.
 
 A text string, the description of the event.
 
+    $record->{location}
+
+A text string, the location (if any) of the event (Calendar database only).
+
     $record->{note}
 
 A text string, the note (if any) attached to the event.
@@ -202,15 +204,18 @@ sub import
 {
 	&Palm::PDB::RegisterPDBHandlers(__PACKAGE__,
 		[ "date", "DATA" ],
+		[ "PDat", "DATA" ],
 		);
 }
 
 =head2 new
 
   $pdb = new Palm::Datebook;
+  $pdb = new Palm::Datebook({app => 'Calendar'});
 
 Create a new PDB, initialized with the various Palm::Datebook fields
-and an empty record list.
+and an empty record list. Creates a Datebook PDB by default.
+Specify the app parameter as 'Calendar' to create a Calendar PDB.
 
 =cut
 #'
@@ -220,13 +225,19 @@ and an empty record list.
 sub new
 {
 	my $classname	= shift;
+	my $params    = $_[0] || {};
 	my $self	= $classname->SUPER::new(@_);
 			# Create a generic PDB. No need to rebless it,
 			# though.
 
-	$self->{name} = "DatebookDB";	# Default
-	$self->{creator} = "date";
-	$self->{type} = "DATA";
+	if ($params->{app} eq 'Calendar' || $self->{creator} eq 'PDat') {
+		$self->{name} ||= "CalendarDB-PDat";	# Default
+		$self->{creator} = "PDat" if $self->{creator} eq "\0\0\0\0";
+	} else {
+		$self->{name} ||= "DatebookDB";	# Default
+		$self->{creator} = "date" if $self->{creator} eq "\0\0\0\0";
+	}
+	$self->{type} = "DATA" if $self->{type} eq "\0\0\0\0";
 	$self->{attributes}{resource} = 0;
 				# The PDB is not a resource database by
 				# default, but it's worth emphasizing,
@@ -281,6 +292,7 @@ sub new_Record
 
 	$retval->{description} = "";
 	$retval->{note} = undef;
+	$retval->{location} = undef;
 
 	return $retval;
 }
@@ -336,6 +348,7 @@ sub ParseRecord
 	my $self = shift;
 	my %record = @_;
 	my $data;
+	my $iscal = ($self->{creator} eq 'PDat');
 
 	delete $record{offset};	# This is useless
 
@@ -377,14 +390,15 @@ sub ParseRecord
 	$record{year} = $year;
 
 	# Flags
-	my $when_changed	= ($flags & 0x8000 ? 1 : 0);
-	my $have_alarm		= ($flags & 0x4000 ? 1 : 0);
-	my $have_repeat		= ($flags & 0x2000 ? 1 : 0);
-	my $have_note		= ($flags & 0x1000 ? 1 : 0);
-	my $have_exceptions	= ($flags & 0x0800 ? 1 : 0);
+	my $when_changed	    = ($flags & 0x8000 ? 1 : 0);
+	my $have_alarm		    = ($flags & 0x4000 ? 1 : 0);
+	my $have_repeat		    = ($flags & 0x2000 ? 1 : 0);
+	my $have_note		    = ($flags & 0x1000 ? 1 : 0);
+	my $have_exceptions	    = ($flags & 0x0800 ? 1 : 0);
 	my $have_description	= ($flags & 0x0400 ? 1 : 0);
+	my $have_location	    = (($iscal && ($flags & 0x0200)) ? 1 : 0);
 
-	$record{other_flags} = $flags & 0x03ff;
+	$record{other_flags} = $flags & ($iscal ? 0x01ff : 0x03ff);
 
 	if ($when_changed)
 	{
@@ -517,6 +531,26 @@ sub ParseRecord
 		$record{note} = $note;
 	}
 
+	if ($have_location)
+	{
+		my $location;
+
+		$location = shift @fields;
+		$record{location} = $location;
+	}
+
+  $record{other_data}= join ("\0", @fields) if @fields;
+
+	if ($have_location)
+	{
+		my $location;
+
+		$location = shift @fields;
+		$record{location} = $location;
+	}
+
+  $record{other_data}= join ("\0", @fields) if @fields;
+
 	delete $record{data};
 
 	return \%record;
@@ -530,6 +564,7 @@ sub PackRecord
 
 	my $rawDate;
 	my $flags;
+	my $iscal = ($self->{creator} eq 'PDat');
 
 	$rawDate = ($record->{day}            & 0x001f) |
 		  (($record->{month}          & 0x000f) << 5) |
@@ -543,6 +578,7 @@ sub PackRecord
 #  	$flags |= 0x1000 if $record->{note} ne "";
 #  	$flags |= 0x0800 if $#{$record->{exceptions}} >= 0;
 #  	$flags |= 0x0400 if $record->{description} ne "";
+#  	$flags |= 0x0200 if $iscal && $record->{location} ne "";
 
 #  	$retval = pack "C C C C n n",
 #  		$record->{start_hour},
@@ -665,6 +701,22 @@ sub PackRecord
 		$note = $record->{note} . "\0";
 	}
 
+	my $location = undef;
+
+	if ($iscal && defined($record->{location}) && ($record->{location} ne ""))
+	{
+		$flags |= 0x0200;
+		$location = $record->{location} . "\0";
+	}
+
+	my $location = undef;
+
+	if ($iscal && defined($record->{location}) && ($record->{location} ne ""))
+	{
+		$flags |= 0x0200;
+		$location = $record->{location} . "\0";
+	}
+
 	$retval = pack "C C C C n n",
 		$record->{start_hour},
 		$record->{start_minute},
@@ -673,11 +725,12 @@ sub PackRecord
 		$rawDate,
 		$flags;
 
-	$retval .= $alarm	if defined($alarm);
-	$retval .= $repeat	if defined($repeat);
+	$retval .= $alarm	    if defined($alarm);
+	$retval .= $repeat	    if defined($repeat);
 	$retval .= $exceptions	if defined($exceptions);
 	$retval .= $description	if defined($description);
-	$retval .= $note	if defined($note);
+	$retval .= $note        if defined($note);
+	$retval .= $location	if defined($location);
 
 	return $retval;
 }

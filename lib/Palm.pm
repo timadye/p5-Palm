@@ -5,8 +5,6 @@
 #	Copyright (C) 1999, 2000, Andrew Arensburger.
 #	You may distribute this file under the terms of the Artistic
 #	License, as specified in the README file.
-#
-# $Id: Palm.pm,v 1.1 2005/03/09 03:51:22 christophe Exp $
 
 use strict;
 use warnings;

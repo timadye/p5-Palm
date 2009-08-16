@@ -5,8 +5,6 @@
 #	Copyright (C) 1999, 2000, Andrew Arensburger.
 #	You may distribute this file under the terms of the Artistic
 #	License, as specified in the README file.
-#
-# $Id: Mail.pm,v 1.17 2003/06/26 19:21:09 azummo Exp $
 
 use strict;
 package Palm::Mail;
