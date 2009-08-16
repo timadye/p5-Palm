@@ -233,9 +233,17 @@ sub ParseAlbum
 
 __END__
 
+=head1 SOURCE CONTROL
+
+The source is in Github:
+
+	http://github.com/briandfoy/p5-Palm/tree/master
+	
 =head1 AUTHOR
 
-Alessandro Zummo E<lt>a.zummo@towertech.itE<gt>
+Alessandro Zummo, C<< <a.zummo@towertech.it> >>
+
+Currently maintained by brian d foy, C<< <bdfoy@cpan.org> >>
 
 =head1 SEE ALSO
 

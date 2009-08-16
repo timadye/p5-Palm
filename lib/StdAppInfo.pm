@@ -619,9 +619,17 @@ sub renameCategory
 1;
 __END__
 
+=head1 SOURCE CONTROL
+
+The source is in Github:
+
+	http://github.com/briandfoy/p5-Palm/tree/master
+	
 =head1 AUTHOR
 
-Andrew Arensburger E<lt>arensb@ooblick.comE<gt>
+Alessandro Zummo, C<< <a.zummo@towertech.it> >>
+
+Currently maintained by brian d foy, C<< <bdfoy@cpan.org> >>
 
 =head1 SEE ALSO
 
