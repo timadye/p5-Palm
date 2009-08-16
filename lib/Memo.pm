@@ -13,7 +13,7 @@ use Palm::StdAppInfo();
 use vars qw( $VERSION @ISA );
 
 # One liner, to allow MakeMaker to work.
-$VERSION = do { my @r = (q$Revision: 1.13 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = '1.009_01';
 
 @ISA = qw( Palm::StdAppInfo Palm::Raw );
 

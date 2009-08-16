@@ -15,7 +15,7 @@ use vars qw( $VERSION @ISA $error );
 	# $error acts like $! in that it reports the error that occurred
 
 # One liner, to allow MakeMaker to work.
-$VERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = '1.009_01';
 
 @ISA = qw( Palm::Raw );
 

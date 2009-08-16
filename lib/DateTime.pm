@@ -19,9 +19,10 @@ use strict;
 
 use Exporter;
 use POSIX;
+use vars qw($VERSION);
 
 # One liner, to allow MakeMaker to work.
-$Palm::DateTime::VERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = '1.009_01';
 
 @Palm::DateTime::ISA = qw( Exporter );
 

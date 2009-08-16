@@ -18,7 +18,7 @@ use Palm::PDB;
 use vars qw( $VERSION @ISA );
 
 # One liner, to allow MakeMaker to work.
-$VERSION = do { my @r = (q$Revision: 1.11 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = '1.009_01';
 
 @ISA = qw( Palm::PDB );
 

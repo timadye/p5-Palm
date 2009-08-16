@@ -16,7 +16,7 @@ use vars qw( $VERSION @ISA
 	%fieldMapBits );
 
 # One liner, to allow MakeMaker to work.
-$VERSION = do { my @r = (q$Revision: 1.19 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = '1.009_01';
 
 @ISA = qw( Palm::StdAppInfo Palm::Raw );
 

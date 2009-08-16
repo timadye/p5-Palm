@@ -12,7 +12,7 @@ package Palm;
 use vars qw( $VERSION );
 
 # One liner, to allow MakeMaker to work.
-$VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = '1.009_01';
 
 =head1 NAME
 
