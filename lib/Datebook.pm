@@ -541,16 +541,6 @@ sub ParseRecord
 
   $record{other_data}= join ("\0", @fields) if @fields;
 
-	if ($have_location)
-	{
-		my $location;
-
-		$location = shift @fields;
-		$record{location} = $location;
-	}
-
-  $record{other_data}= join ("\0", @fields) if @fields;
-
 	delete $record{data};
 
 	return \%record;
