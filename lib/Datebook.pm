@@ -539,7 +539,7 @@ sub ParseRecord
 		$record{location} = $location;
 	}
 
-  $record{other_data}= join ("\0", @fields) if @fields;
+	$record{other_data}= join ("\0", @fields) if @fields;
 
 	delete $record{data};
 
