@@ -12,7 +12,7 @@ package Palm;
 use vars qw( $VERSION );
 
 # One liner, to allow MakeMaker to work.
-$VERSION = '1.009_01';
+$VERSION = '1.009_02';
 
 =head1 NAME
 
