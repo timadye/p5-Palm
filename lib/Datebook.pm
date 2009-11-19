@@ -52,8 +52,8 @@ This is a scalar, the raw data of the sort block.
     $record->{year}
 
 The day, month and year of the event. The day and month start at 1
-(I<i.e.>, for January, C<$record-E<gt>{month}> is set to 1). The year
-is a four-digit number (for dates in 2001, C<$record-E<gt>{year}> is
+(I<i.e.>, for January, C<< $record->{month} >> is set to 1). The year
+is a four-digit number (for dates in 2001, C<< $record->{year} >> is
 "2001").
 
 For repeating events, these fields specify the first date at which the
@@ -84,7 +84,7 @@ I<e.g.>, if "unit" is 1 and "advance" is 5, then the alarm will sound
 
 If C<advance> is -1, then there is no alarm associated with this event.
 New records created via C<new_Record> have a 10 minute alarm set by
-default. C<undef $record->{alarm}> to remove this alarm before writing.
+default. C<< undef $record->{alarm} >> to remove this alarm before writing.
 An alarm icon will still show up in the Datebook if the C<alarm>
 field exists, even with C<advance> set to -1.
 
