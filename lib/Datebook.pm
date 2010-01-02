@@ -90,7 +90,7 @@ field exists, even with C<advance> set to -1.
 
     %{$record->{repeat}}
 
-This has exists iff this is a repeating event.
+This exists iff this is a repeating event.
 
     $record->{repeat}{type}
 
@@ -122,8 +122,8 @@ Monday, and so forth.
 
     $record->{repeat}{start_of_week}
 
-I'm not sure what this is, but the Datebook app appears to perform
-some hairy calculations involving this.
+Day the week starts on (0 for Sunday, 1 for Monday). This affects
+the phase of events that repeat every 2nd (or more) Sunday.
 
 =item 3
 
@@ -195,6 +195,54 @@ A text string, the location (if any) of the event (Calendar database only).
 
 A text string, the note (if any) attached to the event.
 
+    %{$record->{timezone}}
+
+This exists iff a time zone has been set for the event.
+
+    $record->{timezone}{name}
+
+The time zone name, I<e.g.>, "London" or "San Francisco".
+
+    $record->{timezone}{country}
+
+The country the time zone is in. This is an integer defined in Core/System/PalmLocale.h.
+
+    $record->{timezone}{offset}
+
+This gives the offset from UTC, in minutes, of the time zone.
+
+    $record->{timezone}{dst_adjustment}
+
+This gives the additional offset while daylight savings time is in effect.
+The offset from UTC is $record->{timezone}{offset} + $record->{timezone}{dst_adjustment}
+(actually only 0 or 60 are used).
+
+    $record->{timezone}{custom}
+
+Should indicate whether this location was created by the user, though this
+always seems to be true.
+
+    $record->{timezone}{flags}
+
+Reserved flags.
+
+    $record->{timezone}{start_hour}
+    $record->{timezone}{start_daynum}
+    $record->{timezone}{start_weeknum}
+    $record->{timezone}{start_month}
+    $record->{timezone}{end_hour}
+    $record->{timezone}{end_daynum}
+    $record->{timezone}{end_weeknum}
+    $record->{timezone}{end_month}
+
+These define the period during which daylight savings time is in effect
+if $record->{timezone}{dst_adjustment} is non-zero.
+daynum specifies the day of week (0=Sunday, 6=Saturday) and weeknum specifies the week of month
+(0=1st, 3=4th, 4=last), analagously to the "monthly by day" repeating event.
+I<e.g.>, The "London" time zone has DST starting on the last Sunday of March, which
+is indicated with start_daynum=0 (Sunday), start_weeknum=4 (last week of the month),
+and start_month=3 (March).
+
 =head1 METHODS
 
 =cut
@@ -261,7 +309,7 @@ sub new
 Creates a new Datebook record, with blank values for all of the fields.
 
 C<new_Record> does B<not> add the new record to C<$pdb>. For that,
-you want C<$pdb-E<gt>append_Record>.
+you want C<< $pdb->append_Record >>.
 
 =cut
 
@@ -513,7 +561,7 @@ sub ParseRecord
 		}
 	}
 
-	my @fields = split /\0/, $data;
+	my @fields = split /\0/, $data, -1;
 
 	if ($have_description)
 	{
@@ -539,7 +587,28 @@ sub ParseRecord
 		$record{location} = $location;
 	}
 
-	$record{other_data}= join ("\0", @fields) if @fields;
+	my $other_data= join ("\0", @fields);
+
+	if ($iscal && length ($other_data) >= 21 && substr ($other_data, 0, 4) eq 'Bd00') {
+		my $len= unpack ('n', substr ($other_data, 4, 2));
+		if ($len+6 <= length ($other_data)) {
+			my $tzdata= substr ($other_data, 6, $len);
+			$other_data= substr ($other_data, $len+6);
+			@{$record{timezone}}{qw(offset start_hour start_daynum start_weeknum start_month
+											 end_hour   end_daynum   end_weeknum   end_month
+									dst_adjustment country flags name)}= unpack ('n C8 n C2 a*', $tzdata);
+			$record{timezone}{name} =~ s/\0$//;
+			$record{timezone}{offset}=         $record{timezone}{offset}        -65536
+				if $record{timezone}{offset}         > 32767;  # signed short
+			$record{timezone}{dst_adjustment}= $record{timezone}{dst_adjustment}-65536
+				if $record{timezone}{dst_adjustment} > 32767;  # signed short
+			$record{timezone}{custom}= ($record{timezone}{flags} & 0x80) ? 1 : 0;
+			$record{timezone}{flags} &= 0x7f;
+			$record{timezone}{data}= $tzdata;
+		}
+	}
+
+	$record{other_data}= $other_data if $other_data ne '';
 
 	delete $record{data};
 
@@ -713,6 +782,21 @@ sub PackRecord
 	$retval .= $description	if defined($description);
 	$retval .= $note        if defined($note);
 	$retval .= $location	if defined($location);
+
+	if ($iscal && $record->{timezone}) {
+		my $tzflags= $record->{timezone}{flags};
+		$tzflags |= 0x80 if $record->{timezone}{custom};
+		my $tzdata = pack ('n C8 n C2',
+						   @{$record->{timezone}}{qw(offset start_hour start_daynum start_weeknum start_month
+															  end_hour   end_daynum   end_weeknum   end_month
+													 dst_adjustment country)}, $tzflags);
+		$tzdata .= "$record->{timezone}{name}\0";
+		$retval .= 'Bd00';
+		$retval .= pack ('n', length ($tzdata));
+		$retval .= $tzdata;
+	}
+
+	$retval .= $record->{other_data} if exists $record->{other_data};
 
 	return $retval;
 }

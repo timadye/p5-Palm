@@ -1,3 +1,7 @@
+2010-01-01	Tim Adye <T.J.Adye@rl.ac.uk>
+
+	* Palm/Datebook.pm: add support for time zone entries.
+
 2009-08-17	Tim Adye <T.J.Adye@rl.ac.uk>
 
 	* Palm/Datebook.pm: add support for the newer-format Palm Calendar
